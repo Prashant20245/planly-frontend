@@ -1,26 +1,546 @@
 @import "tailwindcss";
 
+/* --------------------------------------------------
+   1. Design tokens
+-------------------------------------------------- */
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+
+  --primary: #059669;
+  --primary-dark: #047857;
+  --primary-light: #ecfdf5;
+
+  --muted: #64748b;
+  --border: #e2e8f0;
+
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+
+  --radius-card: 16px;
+
+  --container-width: 1240px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+
+  --font-sans: Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 3px solid rgb(5 150 105 / 45%);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #a7f3d0;
+  color: #064e3b;
+}
+
+/* --------------------------------------------------
+   2. Layout utilities
+-------------------------------------------------- */
+
+.container-main {
+  width: min(calc(100% - 40px), var(--container-width));
+  margin-inline: auto;
+}
+
+.section-padding {
+  padding-block: 76px;
+}
+
+.section-heading {
+  font-size: clamp(1.8rem, 3.2vw, 2.55rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  color: #0f172a;
+}
+
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #d1fae5;
+  border-radius: 999px;
+  background: #ecfdf5;
+  padding: 6px 12px;
+  color: #047857;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------
+   3. Hero background
+-------------------------------------------------- */
+
+.hero-background {
+  background:
+    radial-gradient(
+      ellipse at 82% 22%,
+      rgb(167 243 208 / 28%),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 15% 85%,
+      rgb(209 250 229 / 55%),
+      transparent 38%
+    ),
+    linear-gradient(180deg, #fbfefc 0%, #ffffff 100%);
+}
+
+/* --------------------------------------------------
+   4. Dashboard preview
+-------------------------------------------------- */
+
+.dashboard-shell {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgb(226 232 240 / 90%);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 24px 70px rgb(15 23 42 / 9%),
+    0 4px 16px rgb(15 23 42 / 4%);
+}
+
+.dashboard-sidebar {
+  display: none;
+  width: 138px;
+  flex-shrink: 0;
+  border-right: 1px solid #f1f5f9;
+  padding: 20px 10px;
+  background: #ffffff;
+}
+
+.icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.icon-green {
+  background: #dcfce7;
+  color: #059669;
+}
+
+.icon-purple {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.icon-blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.icon-orange {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.icon-red {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.progress-ring {
+  display: grid;
+  width: 108px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#059669 0% 55%, #f59e0b 55% 77%, #ef4444 77% 100%);
+}
+
+.progress-ring-inner {
+  display: flex;
+  width: 78px;
+  aspect-ratio: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: white;
+}
+
+/* --------------------------------------------------
+   5. Feature cards
+-------------------------------------------------- */
+
+.feature-card {
+  min-height: 190px;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  padding: 22px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.feature-card:hover {
+  border-color: #a7f3d0;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 5%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .feature-card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* --------------------------------------------------
+   6. Task categories
+-------------------------------------------------- */
+
+.category-tag {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.category-blue {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.category-green {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.category-purple {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.category-orange {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+/* --------------------------------------------------
+   7. Phone illustration
+-------------------------------------------------- */
+
+.phone-frame {
+  position: relative;
+  min-height: 320px;
+  width: 100%;
+  overflow: hidden;
+  border: 5px solid #111827;
+  border-radius: 27px;
+  background: #ffffff;
+  box-shadow:
+    0 20px 40px rgb(15 23 42 / 15%),
+    inset 0 0 0 1px rgb(255 255 255 / 20%);
+}
+
+.phone-notch {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  width: 54px;
+  height: 13px;
+  transform: translateX(-50%);
+  border-radius: 0 0 10px 10px;
+  background: #111827;
+}
+
+/* --------------------------------------------------
+   8. Final CTA
+-------------------------------------------------- */
+
+.cta-background {
+  background:
+    radial-gradient(ellipse at 0% 100%, rgb(16 185 129 / 15%), transparent 40%),
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgb(167 243 208 / 25%),
+      transparent 40%
+    ),
+    linear-gradient(135deg, #f0fdf4 0%, #ffffff 55%, #ecfdf5 100%);
+}
+
+/* --------------------------------------------------
+   9. Footer
+-------------------------------------------------- */
+
+.social-link {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  color: #475569;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.social-link:hover {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+/* --------------------------------------------------
+   10. Tablet and desktop
+-------------------------------------------------- */
+
+@media (min-width: 768px) {
+  .dashboard-sidebar {
+    display: block;
+  }
+}
+
+/* --------------------------------------------------
+   11. Mobile
+-------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .container-main {
+    width: min(calc(100% - 28px), var(--container-width));
+  }
+
+  .section-padding {
+    padding-block: 52px;
+  }
+
+  .dashboard-shell {
+    border-radius: 14px;
+  }
+
+  .dashboard-sidebar {
+    display: none;
+  }
+
+  .feature-card {
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .phone-frame {
+    min-height: 300px;
+    border-width: 4px;
+    border-radius: 23px;
+  }
+}
+
+/* --------------------------------------------------
+   12. Reduced motion accessibility
+-------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================
+   Planly Signup Page
+========================================= */
+
+.signup-page {
+  isolation: isolate;
+  background:
+    radial-gradient(
+      ellipse at 15% 40%,
+      rgb(209 250 229 / 25%),
+      transparent 38%
+    ),
+    linear-gradient(135deg, #fbfefc 0%, #ffffff 55%, #f0fdf9 100%);
+}
+
+/* Signup form card */
+
+.signup-card {
+  position: relative;
+  z-index: 10;
+  min-width: 0;
+  box-shadow:
+    0 16px 55px rgb(15 23 42 / 4%),
+    0 2px 8px rgb(15 23 42 / 2%);
+}
+
+/* Form inputs */
+
+.signup-input-wrapper {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #dbe1eb;
+  border-radius: 11px;
+  background: rgb(255 255 255 / 90%);
+  padding: 0 14px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.signup-input-wrapper:hover {
+  border-color: #cbd5e1;
+}
+
+.signup-input-wrapper:focus-within {
+  border-color: #059669;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgb(5 150 105 / 10%);
+}
+
+.signup-input-error {
+  border-color: #ef4444;
+}
+
+.signup-input-error:focus-within {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 10%);
+}
+
+.signup-input {
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.signup-input::placeholder {
+  color: #7c879f;
+  opacity: 1;
+}
+
+.signup-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* Landscape illustration */
+
+.signup-page svg {
+  max-width: none;
+}
+
+/* Tablet */
+
+@media (max-width: 1023px) {
+  .signup-page > div {
+    max-width: 760px;
+  }
+
+  .signup-page > svg {
+    height: 38%;
+    opacity: 0.6;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+  .signup-page {
+    min-height: 100vh;
+  }
+
+  .signup-card {
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgb(15 23 42 / 5%);
+  }
+
+  .signup-input-wrapper {
+    min-height: 52px;
+    gap: 10px;
+    padding-inline: 12px;
+  }
+
+  .signup-input {
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .signup-page > svg {
+    height: 28%;
+    opacity: 0.35;
+  }
+}
+
+/* Accessibility: reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-input-wrapper,
+  .signup-input-wrapper *,
+  .signup-card *,
+  .signup-page a {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

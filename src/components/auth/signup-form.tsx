@@ -19,6 +19,7 @@ import {
 } from "@/lib/auth/signup-validation";
 
 import { registerUser } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 const initialValues: SignupFormValues = {
   name: "",
@@ -27,6 +28,7 @@ const initialValues: SignupFormValues = {
 };
 
 export function SignupForm() {
+  const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>(initialValues);
 
   const [errors, setErrors] = useState<SignupFieldErrors>({});
@@ -71,15 +73,36 @@ export function SignupForm() {
     setIsSubmitting(true);
 
     try {
-      const result = await registerUser(values);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: values.name,
+            email: values.email,
+            password: values.password,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("API request failed.");
+      }
+
+      const data = await response.json();
 
       setSuccessMessage(
-        result.message || "Your account was created successfully.",
+        data.message || "Your account was created successfully.",
       );
 
       setValues(initialValues);
       setErrors({});
       setShowPassword(false);
+
+      router.replace("/login");
     } catch (error) {
       setServerError(
         error instanceof Error

@@ -22,9 +22,9 @@ type AppHeaderProps = {
 };
 
 export default function AppHeader({
-  userName = "Prashant",
+  userName,
   userEmail,
-  onSignOut,
+  onSignOut = true,
 }: AppHeaderProps) {
   const router = useRouter();
 
@@ -79,6 +79,8 @@ export default function AppHeader({
     if (!onSignOut || isSigningOut) return;
 
     try {
+      localStorage.removeItem("accessToken");
+      router.replace("/login");
       setIsSigningOut(true);
       await onSignOut();
     } finally {

@@ -22,6 +22,7 @@ import {
 
 import { loginUser } from "@/services/auth.service";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
+import { BiEraser } from "react-icons/bi";
 
 const initialValues: LoginFormValues = {
   email: "",
@@ -61,44 +62,34 @@ export function LoginForm() {
     setServerError("");
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (isSubmitting) return;
-
-    setServerError("");
-
-    const validationErrors = validateLogin(values);
-
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
     try {
-      const result = await loginUser(values);
-
-      // Accept only a relative path to prevent open redirects.
-      const redirectTo =
-        result.redirectTo &&
-        result.redirectTo.startsWith("/") &&
-        !result.redirectTo.startsWith("//") &&
-        !result.redirectTo.includes("\\")
-          ? result.redirectTo
-          : "/dashboard";
-
-      router.replace(redirectTo);
-      router.refresh();
-    } catch {
-      // Avoid exposing internal backend errors or account details.
-      setServerError(
-        "Unable to sign in with those credentials. Please check your details and try again.",
+      //fetch response
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+          }),
+        },
       );
-    } finally {
-      setIsSubmitting(false);
+      if (!response.ok) {
+        throw new Error("API request failed.");
+      }
+      const data = await response.json();
+      if (!data.loginData.accessToken) {
+        throw new Error("Backend did not return access token.");
+      }
+      localStorage.setItem("accessToken", data.loginData.accessToken);
+      router.replace("/dashboard");
+    } catch (error) {
+      console.log(error);
     }
   }
 

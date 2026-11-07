@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 type AppHeaderProps = {
   userName?: string;
@@ -27,6 +28,8 @@ export default function AppHeader({
   onSignOut = true,
 }: AppHeaderProps) {
   const router = useRouter();
+
+  const { logout } = useAuth();
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,7 +82,8 @@ export default function AppHeader({
     if (!onSignOut || isSigningOut) return;
 
     try {
-      localStorage.removeItem("accessToken");
+      // localStorage.removeItem("accessToken");
+      logout();
       router.replace("/login");
       setIsSigningOut(true);
       await onSignOut();

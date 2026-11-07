@@ -1,4 +1,5 @@
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
+import { useAuth } from "@/context/AuthContext";
 
 export const metadata = {
   title: "Dashboard | Planly",
@@ -7,5 +8,6 @@ export const metadata = {
 };
 
 export default function DashboardPage() {
-  return <DashboardOverview userName="Prashant" />;
+  // const { user } = useAuth();
+  return <DashboardOverview />;
 }

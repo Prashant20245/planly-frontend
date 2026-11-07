@@ -19,7 +19,7 @@ export function DashboardGreeting({ name }: DashboardGreetingProps) {
 
       <div className="max-w-xl">
         <p className="text-sm font-medium text-slate-600 sm:text-base">
-          Good afternoon,
+          Welcome,
         </p>
 
         <div className="mt-0.5 flex flex-wrap items-center gap-3">

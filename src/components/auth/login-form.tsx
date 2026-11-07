@@ -23,6 +23,7 @@ import {
 import { loginUser } from "@/services/auth.service";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { BiEraser } from "react-icons/bi";
+import { useAuth } from "@/context/AuthContext";
 
 const initialValues: LoginFormValues = {
   email: "",
@@ -32,6 +33,8 @@ const initialValues: LoginFormValues = {
 
 export function LoginForm() {
   const router = useRouter();
+
+  const { setAuth } = useAuth();
 
   const [values, setValues] = useState<LoginFormValues>(initialValues);
 
@@ -87,6 +90,7 @@ export function LoginForm() {
         throw new Error("Backend did not return access token.");
       }
       localStorage.setItem("accessToken", data.loginData.accessToken);
+      setAuth(data.loginData.user);
       router.replace("/dashboard");
     } catch (error) {
       console.log(error);

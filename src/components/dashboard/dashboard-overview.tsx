@@ -1,3 +1,4 @@
+"use client";
 import {
   contributionData,
   dashboardStats,
@@ -14,12 +15,11 @@ import { HoursContributionChart } from "./hours-contribution-chart";
 import { RecentActivity } from "./recent-activity";
 import { TaskOverviewChart } from "./task-overview-chart";
 import { TodaysTasks } from "./todays-tasks";
+import { useAuth } from "@/context/AuthContext";
 
-type DashboardOverviewProps = {
-  userName: string;
-};
-
-export function DashboardOverview({ userName }: DashboardOverviewProps) {
+export function DashboardOverview() {
+  const { user } = useAuth();
+  const userName = user?.name ?? "User";
   return (
     <main className="mx-auto w-full max-w-[1800px] space-y-4 p-3 sm:p-5 lg:p-6">
       {/* Personalized greeting */}

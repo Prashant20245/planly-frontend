@@ -30,7 +30,7 @@ export function DailyPlanPage() {
   // Use a stable initial date for this UI prototype.
   // Replace it with the actual current date or a URL-selected date
   // when integrating the page with the backend.
-  const [selectedDate, setSelectedDate] = useState(() => new Date(2026, 8, 26));
+  const [selectedDate, setSelectedDate] = useState(() => new Date(Date.now()));
 
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
@@ -44,7 +44,7 @@ export function DailyPlanPage() {
 
   const [sortBy, setSortBy] = useState<TaskSortOption>("DEADLINE");
 
-  const [isTaskFormOpen, setIsTaskFormOpen] = useState(true);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
 
   const selectedDateKey = toDateKey(selectedDate);
 

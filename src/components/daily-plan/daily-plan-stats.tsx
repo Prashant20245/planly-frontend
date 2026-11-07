@@ -107,7 +107,7 @@ export function DailyPlanStats({
         );
       })}
 
-      <article className="relative isolate flex min-h-32 items-center overflow-hidden rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-emerald-100/80 p-4 sm:col-span-2 2xl:col-span-1">
+      {/* <article className="relative isolate flex min-h-32 items-center overflow-hidden rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-emerald-100/80 p-4 sm:col-span-2 2xl:col-span-1">
         <div className="max-w-[85%]">
           <p className="font-serif text-base leading-6 text-slate-800">
             “Discipline today creates the life you want tomorrow.”
@@ -119,7 +119,7 @@ export function DailyPlanStats({
           className="absolute -bottom-2 -right-1 -z-10 size-24 rotate-[-25deg] text-emerald-800/20"
           strokeWidth={1}
         />
-      </article>
+      </article> */}
     </section>
   );
 }

@@ -1,6 +1,6 @@
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED";
 
-export type TaskPriority = "LOW" | "MEDIUM" | "HIGH";
+export type TaskPriority = "EASY" | "MEDIUM" | "HIGH";
 
 export type TaskTag =
   | "Development"
@@ -15,20 +15,17 @@ export type Subtask = {
   id: string;
   title: string;
   completed: boolean;
-  priority: TaskPriority;
-  dueDate: string;
 };
 
 export type Task = {
-  id: string;
+  id?: string;
   title: string;
   description: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  tag: TaskTag;
-  dueDate: string;
+  difficulty: TaskPriority;
+  tag: string;
+  deadline: string;
+  completed: boolean;
   subtasks: Subtask[];
-  createdAt: string;
 };
 
 export type TaskStatusFilter =

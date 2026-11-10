@@ -48,19 +48,19 @@ export function SubtaskList({
             </span>
           </label>
 
-          <div className="hidden sm:block">
+          {/* <div className="hidden sm:block">
             <PrioritySelector value={subtask.priority} />
-          </div>
+          </div> */}
 
-          <div className="flex items-center gap-1.5 whitespace-nowrap text-[11px] text-slate-500">
+          {/* <div className="flex items-center gap-1.5 whitespace-nowrap text-[11px] text-slate-500">
             <CalendarDays aria-hidden="true" className="size-3.5 shrink-0" />
 
             {formatShortDate(subtask.dueDate)}
-          </div>
+          </div> */}
 
-          <div className="sm:hidden">
+          {/* <div className="sm:hidden">
             <PrioritySelector value={subtask.priority} />
-          </div>
+          </div> */}
         </li>
       ))}
     </ul>

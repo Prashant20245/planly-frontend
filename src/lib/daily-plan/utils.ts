@@ -9,15 +9,34 @@ export function formatDate(date: Date): string {
   }).format(date);
 }
 
-export function formatShortDate(dateString: string): string {
-  const [year, month, day] = dateString.split("-").map(Number);
+// export function formatShortDate(dateString: string): string {
+//   const [year, month, day] = dateString.split("-").map(Number);
+
+//   return new Intl.DateTimeFormat("en-GB", {
+//     day: "2-digit",
+//     month: "short",
+//     year: "numeric",
+//     timeZone: "UTC",
+//   }).format(new Date(Date.UTC(year, month - 1, day)));
+// }
+
+export function formatShortDate(dateString: string | null | undefined): string {
+  if (!dateString) {
+    return "No date";
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Invalid date";
+  }
 
   return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
+  }).format(date);
 }
 
 export function toDateKey(date: Date): string {
@@ -29,17 +48,17 @@ export function toDateKey(date: Date): string {
 }
 
 export function isTaskOverdue(task: Task, selectedDate: string): boolean {
-  return task.status !== "COMPLETED" && task.dueDate < selectedDate;
+  return task.completed && task.deadline < selectedDate;
 }
 
 export function getTaskProgress(task: Task): number {
-  if (task.status === "COMPLETED") {
+  if (task.completed) {
     return 100;
   }
 
-  if (task.subtasks.length === 0) {
-    return task.status === "IN_PROGRESS" ? 60 : 0;
-  }
+  // if (task.subtasks.length === 0) {
+  //   return task.status === "IN_PROGRESS" ? 60 : 0;
+  // }
 
   const completedSubtasks = task.subtasks.filter(
     (subtask) => subtask.completed,
@@ -51,7 +70,7 @@ export function getTaskProgress(task: Task): number {
 export function getTaskStatus(
   task: Task,
 ): "TODO" | "IN_PROGRESS" | "COMPLETED" {
-  if (task.status === "COMPLETED") {
+  if (task.completed) {
     return "COMPLETED";
   }
 
@@ -64,7 +83,7 @@ export function getTaskStatus(
 
   if (
     task.subtasks.some((subtask) => subtask.completed) ||
-    task.status === "IN_PROGRESS"
+    task.completed === false
   ) {
     return "IN_PROGRESS";
   }
@@ -101,7 +120,7 @@ export function getPriorityRank(priority: TaskPriority): number {
   const ranks: Record<TaskPriority, number> = {
     HIGH: 3,
     MEDIUM: 2,
-    LOW: 1,
+    EASY: 1,
   };
 
   return ranks[priority];

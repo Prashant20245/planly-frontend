@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { formatDate, toDateKey } from "@/lib/daily-plan/utils";
+import { useEffect } from "react";
 
 type DailyPlanHeaderProps = {
   selectedDate: Date;
@@ -26,6 +27,9 @@ export function DailyPlanHeader({
     nextDate.setDate(nextDate.getDate() + days);
     onDateChange(nextDate);
   }
+  useEffect(() => {
+    console.log(selectedDate);
+  }, [selectedDate]);
 
   return (
     <section className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -40,6 +44,16 @@ export function DailyPlanHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5">
+        <button
+          type="button"
+          onClick={() => changeDate(-1)}
+          aria-label="Previous day"
+          className="flex size-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-emerald-600"
+        >
+          <ChevronLeft aria-hidden="true" className="size-5" />
+        </button>
+
+        {/* Date */}
         <label className="relative flex h-11 min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3">
           <CalendarDays
             aria-hidden="true"
@@ -69,22 +83,13 @@ export function DailyPlanHeader({
           />
         </label>
 
-        <button
-          type="button"
-          onClick={() => changeDate(-1)}
-          aria-label="Previous day"
-          className="flex size-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-emerald-600"
-        >
-          <ChevronLeft aria-hidden="true" className="size-5" />
-        </button>
-
-        <button
+        {/* <button
           type="button"
           onClick={() => onDateChange(new Date())}
           className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-800 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-emerald-600"
         >
           Today
-        </button>
+        </button> */}
 
         <button
           type="button"

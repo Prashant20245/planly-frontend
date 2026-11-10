@@ -7,6 +7,7 @@ import { TASK_TAGS } from "@/lib/daily-plan/constants";
 
 import { PrioritySelector } from "./priority-selector";
 import type { Task, TaskPriority, TaskTag } from "@/types/daily-plan";
+import { toast } from "../ui/toast";
 
 type TaskFormPanelProps = {
   onClose: () => void;
@@ -16,7 +17,7 @@ type TaskFormPanelProps = {
 type SubtaskDraft = {
   id: string;
   title: string;
-  priority: TaskPriority;
+  completed: boolean;
 };
 
 const inputClass =
@@ -25,9 +26,9 @@ const inputClass =
 export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState<TaskPriority>("MEDIUM");
-  const [tag, setTag] = useState<TaskTag>("Development");
+  const [deadline, setDeadline] = useState("");
+  const [difficulty, setDifficulty] = useState<TaskPriority>("MEDIUM");
+  const [tag, setTag] = useState<string>("");
 
   const [subtasks, setSubtasks] = useState<SubtaskDraft[]>([]);
   const [subtaskTitle, setSubtaskTitle] = useState("");
@@ -45,7 +46,7 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
       {
         id: crypto.randomUUID(),
         title: trimmedTitle,
-        priority: "MEDIUM",
+        completed: false,
       },
     ]);
 
@@ -56,15 +57,15 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
     setSubtasks((current) => current.filter((subtask) => subtask.id !== id));
   }
 
-  function updateSubtaskPriority(id: string, nextPriority: TaskPriority) {
-    setSubtasks((current) =>
-      current.map((subtask) =>
-        subtask.id === id ? { ...subtask, priority: nextPriority } : subtask,
-      ),
-    );
-  }
+  // function updateSubtaskPriority(id: string, nextPriority: TaskPriority) {
+  //   setSubtasks((current) =>
+  //     current.map((subtask) =>
+  //       subtask.id === id ? { ...subtask, priority: nextPriority } : subtask,
+  //     ),
+  //   );
+  // }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
@@ -75,7 +76,7 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
       return;
     }
 
-    if (!dueDate) {
+    if (!deadline) {
       setError("Please select a deadline.");
       return;
     }
@@ -86,27 +87,45 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
     }
 
     const task: Task = {
-      id: crypto.randomUUID(),
       title: trimmedTitle,
       description: description.trim(),
-      status: "TODO",
-      priority,
+      deadline,
+      difficulty,
       tag,
-      dueDate,
-      createdAt: new Date().toISOString(),
-      subtasks: subtasks.map((subtask) => ({
-        id: subtask.id,
-        title: subtask.title,
-        completed: false,
-        priority: subtask.priority,
-        dueDate,
-      })),
+      subtasks,
+      // subtasks: subtasks.map((subtask) => ({
+      //   id: subtask.id,
+      //   title: subtask.title,
+      //   completed: false,
+      // })),
     };
 
     setIsSubmitting(true);
 
+    const token = localStorage.getItem("accessToken");
+
     try {
-      onSubmit(task);
+      // onSubmit(task);
+      console.log(task);
+      const result = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(task),
+        },
+      );
+
+      if (!result.ok) {
+        throw new Error("Task creation failed.");
+      }
+      const data = await result.json();
+
+      toast.add({ type: "success", description: data.message });
+      console.log(data.data);
     } catch {
       setError("Unable to create the task. Please try again.");
     } finally {
@@ -195,14 +214,14 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
               id="task-deadline"
               type="date"
               required
-              value={dueDate}
-              onChange={(event) => setDueDate(event.target.value)}
+              value={deadline}
+              onChange={(event) => setDeadline(event.target.value)}
               className={`${inputClass} pl-10`}
             />
           </div>
         </div>
 
-        <PrioritySelector value={priority} onChange={setPriority} />
+        <PrioritySelector value={difficulty} onChange={setDifficulty} />
 
         <div>
           <label
@@ -214,8 +233,11 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
 
           <select
             id="task-tag"
+            // multiple
             value={tag}
-            onChange={(event) => setTag(event.target.value as TaskTag)}
+            onChange={(event) => {
+              setTag(event.target.value);
+            }}
             className={inputClass}
           >
             {TASK_TAGS.map((item) => (
@@ -273,10 +295,10 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
                   <span className="min-w-0 flex-1 truncate text-xs text-slate-700">
                     {subtask.title}
                   </span>
-
+                  {/* 
                   <select
                     aria-label={`Priority for ${subtask.title}`}
-                    value={subtask.priority}
+                    value={subtask.difficulty}
                     onChange={(event) =>
                       updateSubtaskPriority(
                         subtask.id,
@@ -288,7 +310,7 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
-                  </select>
+                  </select> */}
 
                   <button
                     type="button"

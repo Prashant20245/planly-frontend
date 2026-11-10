@@ -7,7 +7,7 @@ type PrioritySelectorProps = {
 };
 
 const priorityStyles: Record<TaskPriority, string> = {
-  LOW: "border-emerald-100 bg-emerald-50 text-emerald-800",
+  EASY: "border-emerald-100 bg-emerald-50 text-emerald-800",
   MEDIUM: "border-amber-100 bg-amber-50 text-amber-800",
   HIGH: "border-red-100 bg-red-50 text-red-700",
 };
@@ -20,13 +20,13 @@ export function PrioritySelector({
   if (onChange) {
     return (
       <fieldset disabled={disabled} className="min-w-0">
-        <legend className="mb-2 text-sm font-medium text-slate-800">
+        {/* <legend className="mb-2 text-sm font-medium text-slate-800">
           Priority / Difficulty
           <span className="text-red-500"> *</span>
-        </legend>
+        </legend> */}
 
         <div className="grid grid-cols-3 gap-2">
-          {(["LOW", "MEDIUM", "HIGH"] as const).map((priority) => {
+          {(["EASY", "MEDIUM", "HIGH"] as const).map((priority) => {
             const selected = value === priority;
 
             return (
@@ -50,7 +50,7 @@ export function PrioritySelector({
                 <span
                   aria-hidden="true"
                   className={`size-3 rounded-full border-2 ${
-                    priority === "LOW"
+                    priority === "EASY"
                       ? "border-emerald-500"
                       : priority === "MEDIUM"
                         ? "border-amber-500"

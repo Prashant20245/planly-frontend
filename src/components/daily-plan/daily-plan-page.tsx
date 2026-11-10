@@ -1,14 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { DailyPlanHeader } from "./daily-plan-header";
 import { DailyPlanStats } from "./daily-plan-stats";
 import { DailyPlanFilters } from "./daily-plan-filters";
 import { TaskList } from "./task-list";
 import { TaskFormPanel } from "./task-form-panel";
-
-import { initialTasks } from "@/lib/daily-plan/data";
 
 import {
   getPriorityRank,
@@ -32,7 +30,7 @@ export function DailyPlanPage() {
   // when integrating the page with the backend.
   const [selectedDate, setSelectedDate] = useState(() => new Date(Date.now()));
 
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const [activeStatus, setActiveStatus] = useState<TaskStatusFilter>("ALL");
 
@@ -47,15 +45,49 @@ export function DailyPlanPage() {
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
 
   const selectedDateKey = toDateKey(selectedDate);
+  // console.log(selectedDate);
 
+  const formattedDate = [
+    selectedDate.getFullYear(),
+    String(selectedDate.getMonth() + 1).padStart(2, "0"),
+    String(selectedDate.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  console.log(formattedDate);
+
+  //fetch all daily task
+  useEffect(() => {
+    async function fetchDailyTasks() {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const result = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/date/${formattedDate}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (!result.ok) {
+          throw new Error("Fetch to fail daily tasks.");
+        }
+        const data = await result.json();
+        setTasks(data.tasks);
+        console.log(data.task);
+      } catch (error) {
+        console.log("Task fetch error:", error);
+      }
+    }
+    fetchDailyTasks();
+  }, [formattedDate]);
+
+  // used for calculating task count of differnt type
   const statistics = useMemo(() => {
-    const completed = tasks.filter(
-      (task) => getTaskStatus(task) === "COMPLETED",
-    ).length;
+    const completed = tasks.filter((task) => task.completed === true).length;
 
-    const inProgress = tasks.filter(
-      (task) => getTaskStatus(task) === "IN_PROGRESS",
-    ).length;
+    const inProgress = tasks.filter((task) => task.completed === false).length;
 
     const overdue = tasks.filter((task) =>
       isTaskOverdue(task, selectedDateKey),
@@ -108,7 +140,7 @@ export function DailyPlanPage() {
       const matchesTag = selectedTag === "ALL" || task.tag === selectedTag;
 
       const matchesPriority =
-        selectedPriority === "ALL" || task.priority === selectedPriority;
+        selectedPriority === "ALL" || task.difficulty === selectedPriority;
 
       return matchesStatus && matchesTag && matchesPriority;
     });
@@ -116,10 +148,10 @@ export function DailyPlanPage() {
     result.sort((a, b) => {
       switch (sortBy) {
         case "DEADLINE":
-          return a.dueDate.localeCompare(b.dueDate);
+          return a.deadline.localeCompare(b.deadline);
 
         case "PRIORITY":
-          return getPriorityRank(b.priority) - getPriorityRank(a.priority);
+          return getPriorityRank(b.difficulty) - getPriorityRank(a.difficulty);
 
         case "TITLE":
           return a.title.localeCompare(b.title);

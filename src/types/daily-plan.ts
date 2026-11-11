@@ -14,11 +14,12 @@ export type TaskTag =
 export type Subtask = {
   id: string;
   title: string;
+  taskId: string;
   completed: boolean;
 };
 
 export type Task = {
-  id?: string;
+  id: string;
   title: string;
   description: string;
   difficulty: TaskPriority;

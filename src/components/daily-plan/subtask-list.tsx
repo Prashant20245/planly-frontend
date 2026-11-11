@@ -1,11 +1,13 @@
 "use client";
 
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Trash } from "lucide-react";
 
 import { formatShortDate } from "@/lib/daily-plan/utils";
 
 import { PrioritySelector } from "./priority-selector";
 import type { Subtask, TaskPriority } from "@/types/daily-plan";
+import { useState } from "react";
+import { toast } from "../ui/toast";
 
 type SubtaskListProps = {
   subtasks: Subtask[];
@@ -18,6 +20,55 @@ export function SubtaskList({
   onToggle,
   onPriorityChange,
 }: SubtaskListProps) {
+  const [completed, setCompleted] = useState<boolean>();
+  async function handleChange(subTaskId: string, taskId: string) {
+    const token = localStorage.getItem("accessToken");
+    // Calculate the next state
+    const nextCompleted = !completed;
+
+    // Optimistically update UI
+    setCompleted(nextCompleted);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/updateStatus/task/${taskId}/subTask/${subTaskId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            completed: true,
+          }),
+        },
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleDelete(taskId: string, subtaskId: string) {
+    const token = localStorage.getItem("accessToken");
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/delete/task/${taskId}/subtask/${subtaskId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        throw new Error("API failed.");
+      }
+      const result = await response.json();
+      toast.add({ type: "success", description: result.message });
+    } catch (error) {
+      console.log(error);
+    }
+  }
   if (subtasks.length === 0) {
     return <p className="py-3 text-sm text-slate-500">No subtasks yet.</p>;
   }
@@ -33,7 +84,7 @@ export function SubtaskList({
             <input
               type="checkbox"
               checked={subtask.completed}
-              onChange={() => onToggle(subtask.id)}
+              onChange={() => handleChange(subtask.id, subtask.taskId)}
               className="size-[18px] shrink-0 cursor-pointer accent-emerald-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
             />
 
@@ -47,6 +98,11 @@ export function SubtaskList({
               {subtask.title}
             </span>
           </label>
+
+          <Trash
+            onClick={() => handleDelete(subtask.taskId, subtask.id)}
+            className="h-3 w-3"
+          />
 
           {/* <div className="hidden sm:block">
             <PrioritySelector value={subtask.priority} />

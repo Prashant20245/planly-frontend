@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarDays, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronUp, Trash } from "lucide-react";
 
 import { formatShortDate, getTaskProgress } from "@/lib/daily-plan/utils";
 
@@ -9,6 +9,7 @@ import { PrioritySelector } from "./priority-selector";
 import { SubtaskList } from "./subtask-list";
 
 import type { Task, TaskPriority, TaskTag } from "@/types/daily-plan";
+import { toast } from "../ui/toast";
 
 type TaskItemProps = {
   task: Task;
@@ -34,8 +35,7 @@ export function TaskItem({
   onPriorityChange,
 }: TaskItemProps) {
   const [expanded, setExpanded] = useState(false);
-
-  const completed = task.completed === true;
+  const [completed, setCompleted] = useState(task.completed);
 
   // Calculate progress safely
   const calculatedProgress = getTaskProgress(task);
@@ -49,6 +49,59 @@ export function TaskItem({
   const completedSubtasks = task.subtasks.filter(
     (item) => item.completed,
   ).length;
+
+  async function handleChange() {
+    const token = localStorage.getItem("accessToken");
+    // Calculate the next state
+    const nextCompleted = !completed;
+
+    // Optimistically update UI
+    setCompleted(nextCompleted);
+    const result = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/updateStatus/${task.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          completed: nextCompleted,
+        }),
+      },
+    );
+
+    if (!result.ok) {
+      toast.add({ type: "failed", description: "Failed" });
+      throw new Error("API failed.");
+    }
+
+    const data = await result.json();
+    console.log(data);
+    toast.add({ type: "success", description: data.message });
+  }
+
+  async function handleDelete(taskId: string) {
+    const token = localStorage.getItem("accessToken");
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/delete/${taskId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        throw new Error("API failed.");
+      }
+      toast.add({ type: "success", description: "Task deleted successfully." });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <article className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.02] transition-colors hover:border-slate-300">
@@ -65,7 +118,7 @@ export function TaskItem({
         <input
           type="checkbox"
           checked={completed}
-          onChange={() => handleChange}
+          onChange={handleChange}
           aria-label={`Mark ${task.title} as ${
             completed ? "incomplete" : "complete"
           }`}
@@ -194,8 +247,49 @@ export function TaskItem({
           </div>
         </div>
 
+        {/* Actions: Delete and Expand / Collapse */}
+        <div className="mt-1 items-center justify-end gap-1">
+          {/* Delete */}
+          <button
+            type="button"
+            aria-label={`Delete ${task.title}`}
+            onClick={() => handleDelete(task.id)}
+            className="
+      flex size-8 shrink-0 items-center justify-center
+      rounded-lg text-slate-500 transition-colors
+      hover:bg-red-50 hover:text-red-600
+      focus-visible:outline-2
+      focus-visible:outline-offset-2
+      focus-visible:outline-red-600
+    "
+          >
+            <Trash aria-hidden="true" className="size-4" />
+          </button>
+
+          {/* Expand / Collapse */}
+          <button
+            type="button"
+            aria-label={`${expanded ? "Collapse" : "Expand"} ${task.title}`}
+            aria-expanded={expanded}
+            onClick={() => setExpanded((current) => !current)}
+            className="
+      flex size-8 shrink-0 items-center justify-center
+      rounded-lg text-slate-600 transition-colors
+      hover:bg-slate-100
+      focus-visible:outline-2
+      focus-visible:outline-emerald-600
+    "
+          >
+            {expanded ? (
+              <ChevronUp aria-hidden="true" className="size-4" />
+            ) : (
+              <ChevronDown aria-hidden="true" className="size-4" />
+            )}
+          </button>
+        </div>
+
         {/* Expand / Collapse */}
-        <button
+        {/* <button
           type="button"
           aria-label={`${expanded ? "Collapse" : "Expand"} ${task.title}`}
           aria-expanded={expanded}
@@ -214,7 +308,7 @@ export function TaskItem({
           ) : (
             <ChevronDown aria-hidden="true" className="size-4" />
           )}
-        </button>
+        </button> */}
       </div>
 
       {/* Expanded Content */}

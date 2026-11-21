@@ -12,6 +12,7 @@ import {
   getPriorityRank,
   getTaskStatus,
   isTaskOverdue,
+  isTaskUpcoming,
   matchesStatusFilter,
   toDateKey,
 } from "@/lib/daily-plan/utils";
@@ -32,7 +33,7 @@ export function DailyPlanPage() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const [activeStatus, setActiveStatus] = useState<TaskStatusFilter>("ALL");
+  const [activeStatus, setActiveStatus] = useState<TaskStatusFilter>("TODO");
 
   const [selectedTag, setSelectedTag] = useState<TaskTag | "ALL">("ALL");
 
@@ -45,7 +46,6 @@ export function DailyPlanPage() {
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
 
   const selectedDateKey = toDateKey(selectedDate);
-  // console.log(selectedDate);
 
   const formattedDate = [
     selectedDate.getFullYear(),
@@ -53,11 +53,9 @@ export function DailyPlanPage() {
     String(selectedDate.getDate()).padStart(2, "0"),
   ].join("-");
 
-  console.log(formattedDate);
-
   //fetch all daily task
   useEffect(() => {
-    async function fetchDailyTasks() {
+    async function fetchTasks() {
       try {
         const token = localStorage.getItem("accessToken");
         const result = await fetch(
@@ -80,17 +78,25 @@ export function DailyPlanPage() {
         console.log("Task fetch error:", error);
       }
     }
-    fetchDailyTasks();
+    fetchTasks();
   }, [formattedDate]);
 
   // used for calculating task count of differnt type
   const statistics = useMemo(() => {
-    const completed = tasks.filter((task) => task.completed === true).length;
+    const completed = tasks.filter(
+      (task) => getTaskStatus(task, selectedDateKey) === "COMPLETED",
+    ).length;
 
-    const inProgress = tasks.filter((task) => task.completed === false).length;
+    const inProgress = tasks.filter(
+      (task) => getTaskStatus(task, selectedDateKey) === "IN_PROGRESS",
+    ).length;
 
-    const overdue = tasks.filter((task) =>
-      isTaskOverdue(task, selectedDateKey),
+    const overdue = tasks.filter(
+      (task) => getTaskStatus(task, selectedDateKey) === "OVERDUE",
+    ).length;
+
+    const upcoming = tasks.filter(
+      (task) => getTaskStatus(task, selectedDateKey) === "UPCOMING",
     ).length;
 
     const subtasks = tasks.reduce(
@@ -103,6 +109,7 @@ export function DailyPlanPage() {
       completed,
       inProgress,
       overdue,
+      upcoming,
       subtasks,
     };
   }, [tasks, selectedDateKey]);
@@ -114,21 +121,17 @@ export function DailyPlanPage() {
       IN_PROGRESS: 0,
       COMPLETED: 0,
       OVERDUE: 0,
+      UPCOMING: 0,
     };
 
     for (const task of tasks) {
-      const status = getTaskStatus(task);
+      const status = getTaskStatus(task, selectedDateKey);
 
-      counts[status] += 1;
-
-      if (isTaskOverdue(task, selectedDateKey)) {
-        counts.OVERDUE += 1;
-      }
+      counts[status]++;
     }
 
     return counts;
   }, [tasks, selectedDateKey]);
-
   const filteredTasks = useMemo(() => {
     const result = tasks.filter((task) => {
       const matchesStatus = matchesStatusFilter(
@@ -244,7 +247,6 @@ export function DailyPlanPage() {
         onDateChange={setSelectedDate}
         onAddTask={() => setIsTaskFormOpen(true)}
       />
-
       <DailyPlanStats
         total={statistics.total}
         completed={statistics.completed}
@@ -252,7 +254,6 @@ export function DailyPlanPage() {
         inProgress={statistics.inProgress}
         overdue={statistics.overdue}
       />
-
       <DailyPlanFilters
         activeStatus={activeStatus}
         onStatusChange={setActiveStatus}
@@ -264,7 +265,6 @@ export function DailyPlanPage() {
         onSortChange={setSortBy}
         counts={filterCounts}
       />
-
       <div
         className={`grid min-w-0 items-start gap-4 ${
           isTaskFormOpen
@@ -281,12 +281,30 @@ export function DailyPlanPage() {
           />
         </div>
 
-        {isTaskFormOpen && (
+        {/* {isTaskFormOpen && (
           <div className="min-w-0 xl:sticky xl:top-[85px]">
             <TaskFormPanel
               onClose={() => setIsTaskFormOpen(false)}
               onSubmit={createTask}
             />
+          </div>
+        )} */}
+        {isTaskFormOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center
+    bg-slate-950/40 p-4 backdrop-blur-[2px]"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setIsTaskFormOpen(false);
+              }
+            }}
+          >
+            <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+              <TaskFormPanel
+                onClose={() => setIsTaskFormOpen(false)}
+                onSubmit={createTask}
+              />
+            </div>
           </div>
         )}
       </div>

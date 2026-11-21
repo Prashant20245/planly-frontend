@@ -30,7 +30,7 @@ export function DailyPlanStats({
     {
       label: "Total Subtasks",
       value: String(subtasks),
-      percentage: 50,
+      percentage: completionPercentage,
       icon: Circle,
       iconClass: "bg-blue-50 text-blue-600",
       barClass: "bg-blue-500",
@@ -56,7 +56,8 @@ export function DailyPlanStats({
   return (
     <section
       aria-label="Daily productivity statistics"
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-[repeat(4,minmax(0,1fr))]"
+      // className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-[repeat(4,minmax(0,1fr))]"
+      className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
     >
       {cards.map((card) => {
         const Icon = card.icon;

@@ -35,7 +35,7 @@ export function DailyPlanHeader({
     <section className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-          Daily Plan
+          My Tasks
         </h1>
 
         <p className="mt-1 text-sm text-slate-600 sm:text-base">

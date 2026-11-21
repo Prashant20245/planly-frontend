@@ -34,6 +34,7 @@ export type TaskStatusFilter =
   | "TODO"
   | "IN_PROGRESS"
   | "COMPLETED"
-  | "OVERDUE";
+  | "OVERDUE"
+  | "UPCOMING";
 
 export type TaskSortOption = "DEADLINE" | "PRIORITY" | "TITLE";

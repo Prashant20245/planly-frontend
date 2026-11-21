@@ -19,7 +19,7 @@ export default function HomePage() {
       try {
         const authenticatedUser = await requireAuth();
         if (authenticatedUser) {
-          router.replace("/dashboard");
+          router.replace("/my-tasks");
         }
       } catch (error) {
         console.log(error);

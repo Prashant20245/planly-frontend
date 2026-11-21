@@ -15,29 +15,39 @@ export type SidebarNavItem = {
 };
 
 export const sidebarNavItems: SidebarNavItem[] = [
+  // {
+  //   title: "Dashboard",
+  //   href: "/dashboard",
+  //   icon: House,
+  // },
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: House,
-  },
-  {
-    title: "Daily Plan",
-    href: "/daily",
+    title: "My Tasks",
+    href: "/my-tasks",
     icon: CalendarDays,
   },
+  // {
+  //   title: "Weekly Plan",
+  //   href: "/weekly",
+  //   icon: CalendarRange,
+  // },
+  // {
+  //   title: "Monthly Plan",
+  //   href: "/monthly",
+  //   icon: CalendarDays,
+  // },
+  // {
+  //   title: "Yearly Plan",
+  //   href: "/yearly",
+  //   icon: ChartNoAxesColumnIncreasing,
+  // },
   {
-    title: "Weekly Plan",
-    href: "/weekly",
-    icon: CalendarRange,
+    title: "Summary",
+    href: "/summary",
+    icon: ChartNoAxesColumnIncreasing,
   },
   {
-    title: "Monthly Plan",
-    href: "/monthly",
-    icon: CalendarDays,
-  },
-  {
-    title: "Yearly Plan",
-    href: "/yearly",
+    title: "Goal Bank",
+    href: "/goal-bank",
     icon: ChartNoAxesColumnIncreasing,
   },
   {

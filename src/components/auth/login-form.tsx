@@ -91,7 +91,7 @@ export function LoginForm() {
       }
       localStorage.setItem("accessToken", data.loginData.accessToken);
       setAuth(data.loginData.user);
-      router.replace("/dashboard");
+      router.replace("/my-tasks");
     } catch (error) {
       console.log(error);
     }

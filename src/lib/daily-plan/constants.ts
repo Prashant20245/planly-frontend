@@ -26,6 +26,7 @@ export const TASK_STATUS_FILTERS: {
   { label: "In Progress", value: "IN_PROGRESS" },
   { label: "Completed", value: "COMPLETED" },
   { label: "Overdue", value: "OVERDUE" },
+  { label: "Upcoming", value: "UPCOMING" },
 ];
 
 export const TASK_SORT_OPTIONS: {

@@ -27,7 +27,7 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [difficulty, setDifficulty] = useState<TaskPriority>("MEDIUM");
+  const [difficulty, setDifficulty] = useState<TaskPriority>();
   const [tag, setTag] = useState<string>("");
 
   const [subtasks, setSubtasks] = useState<SubtaskDraft[]>([]);
@@ -51,19 +51,12 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
     ]);
 
     setSubtaskTitle("");
+    console.log(subtasks);
   }
 
   function removeSubtask(id: string) {
     setSubtasks((current) => current.filter((subtask) => subtask.id !== id));
   }
-
-  // function updateSubtaskPriority(id: string, nextPriority: TaskPriority) {
-  //   setSubtasks((current) =>
-  //     current.map((subtask) =>
-  //       subtask.id === id ? { ...subtask, priority: nextPriority } : subtask,
-  //     ),
-  //   );
-  // }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,18 +79,13 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
       return;
     }
 
-    const task: Task = {
+    const payload = {
       title: trimmedTitle,
       description: description.trim(),
       deadline,
       difficulty,
       tag,
       subtasks,
-      // subtasks: subtasks.map((subtask) => ({
-      //   id: subtask.id,
-      //   title: subtask.title,
-      //   completed: false,
-      // })),
     };
 
     setIsSubmitting(true);
@@ -106,8 +94,8 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
 
     try {
       // onSubmit(task);
-      console.log(task);
-      const result = await fetch(
+      console.log(payload);
+      const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/create`,
         {
           method: "POST",
@@ -115,17 +103,17 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(task),
+          body: JSON.stringify(payload),
         },
       );
 
-      if (!result.ok) {
+      if (!response.ok) {
         throw new Error("Task creation failed.");
       }
-      const data = await result.json();
+      const result = await response.json();
 
-      toast.add({ type: "success", description: data.message });
-      console.log(data.data);
+      toast.add({ type: "success", description: result.message });
+      onSubmit(result.task);
     } catch {
       setError("Unable to create the task. Please try again.");
     } finally {
@@ -134,9 +122,15 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
   }
 
   return (
+    // <aside
+    //   aria-labelledby="task-form-title"
+    //   className="min-w-0 rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/[0.04]"
+    // >
     <aside
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="task-form-title"
-      className="min-w-0 rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/[0.04]"
+      className="min-w-0"
     >
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4 sm:px-5">
         <h2

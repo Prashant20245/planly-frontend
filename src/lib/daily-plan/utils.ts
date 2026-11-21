@@ -47,8 +47,24 @@ export function toDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+// export function isTaskOverdue(task: Task, selectedDate: string): boolean {
+//   return !task.completed && task.deadline < selectedDate;
+// }
+
+// export function isTaskUpcoming(task: Task, selectedDate: string): boolean {
+//   return !task.completed && task.deadline > selectedDate;
+// }
+
 export function isTaskOverdue(task: Task, selectedDate: string): boolean {
-  return task.completed && task.deadline < selectedDate;
+  return !task.completed && task.deadline.slice(0, 10) < selectedDate;
+}
+
+export function isTaskUpcoming(task: Task, selectedDate: string): boolean {
+  return (
+    !task.completed &&
+    !task.subtasks.some((subtask) => subtask.completed) &&
+    task.deadline.slice(0, 10) > selectedDate
+  );
 }
 
 export function getTaskProgress(task: Task): number {
@@ -67,53 +83,99 @@ export function getTaskProgress(task: Task): number {
   return Math.round((completedSubtasks / task.subtasks.length) * 100);
 }
 
+// export function getTaskStatus(
+//   task: Task,
+// ): "TODO" | "IN_PROGRESS" | "COMPLETED" {
+//   if (task.completed) {
+//     return "COMPLETED";
+//   }
+
+//   if (
+//     task.subtasks.length > 0 &&
+//     task.subtasks.every((subtask) => subtask.completed)
+//   ) {
+//     return "COMPLETED";
+//   }
+
+//   if (
+//     task.subtasks.some((subtask) => subtask.completed) ||
+//     task.completed === false
+//   ) {
+//     return "IN_PROGRESS";
+//   }
+
+//   if (task.deadline > selectedDate) {
+//     return "UPCOMING";
+//   }
+//   if (task.deadline < selectedDate && task.completed == false) {
+//     return "OVERDUE";
+//   }
+//   return "TODO";
+// }
+
 export function getTaskStatus(
   task: Task,
-): "TODO" | "IN_PROGRESS" | "COMPLETED" {
+  selectedDate: string,
+): "TODO" | "IN_PROGRESS" | "COMPLETED" | "OVERDUE" | "UPCOMING" {
+  // 1. Task is completed
   if (task.completed) {
     return "COMPLETED";
   }
 
-  if (
-    task.subtasks.length > 0 &&
-    task.subtasks.every((subtask) => subtask.completed)
-  ) {
-    return "COMPLETED";
+  // 2. Task deadline has passed
+  if (isTaskOverdue(task, selectedDate)) {
+    return "OVERDUE";
   }
 
-  if (
-    task.subtasks.some((subtask) => subtask.completed) ||
-    task.completed === false
-  ) {
+  // 3. At least one subtask is completed
+  if (task.subtasks.some((subtask) => subtask.completed)) {
     return "IN_PROGRESS";
   }
 
+  // 4. Task deadline is in the future
+  if (isTaskUpcoming(task, selectedDate)) {
+    return "UPCOMING";
+  }
+
+  // 5. No progress, deadline is today
   return "TODO";
 }
+
+// export function matchesStatusFilter(
+//   task: Task,
+//   filter: TaskStatusFilter,
+//   selectedDate: string,
+// ): boolean {
+//   const status = getTaskStatus(task);
+
+//   switch (filter) {
+//     case "ALL":
+//       return true;
+
+//     case "TODO":
+//       return status === "TODO";
+
+//     case "IN_PROGRESS":
+//       return status === "IN_PROGRESS";
+
+//     case "COMPLETED":
+//       return status === "COMPLETED";
+
+//     case "OVERDUE":
+//       return isTaskOverdue(task, selectedDate);
+//   }
+// }
 
 export function matchesStatusFilter(
   task: Task,
   filter: TaskStatusFilter,
   selectedDate: string,
 ): boolean {
-  const status = getTaskStatus(task);
-
-  switch (filter) {
-    case "ALL":
-      return true;
-
-    case "TODO":
-      return status === "TODO";
-
-    case "IN_PROGRESS":
-      return status === "IN_PROGRESS";
-
-    case "COMPLETED":
-      return status === "COMPLETED";
-
-    case "OVERDUE":
-      return isTaskOverdue(task, selectedDate);
+  if (filter === "ALL") {
+    return true;
   }
+
+  return getTaskStatus(task, selectedDate) === filter;
 }
 
 export function getPriorityRank(priority: TaskPriority): number {

@@ -6,7 +6,7 @@ import { DailyPlanHeader } from "./daily-plan-header";
 import { DailyPlanStats } from "./daily-plan-stats";
 import { DailyPlanFilters } from "./daily-plan-filters";
 import { TaskList } from "./task-list";
-import { TaskFormPanel } from "./task-form-panel";
+import { CreateTaskInput, TaskFormPanel } from "./task-form-panel";
 
 import {
   getPriorityRank,
@@ -24,6 +24,7 @@ import type {
   TaskStatusFilter,
   TaskTag,
 } from "@/types/daily-plan";
+import { toast } from "../ui/toast";
 
 export function DailyPlanPage() {
   // Use a stable initial date for this UI prototype.
@@ -235,9 +236,68 @@ export function DailyPlanPage() {
     );
   }
 
-  function createTask(task: Task) {
-    setTasks((current) => [...current, task]);
+  async function createTask(payload: CreateTaskInput) {
+    const token = localStorage.getItem("accessToken");
+
+    // onSubmit(task);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Task creation failed.");
+    }
+    const result = await response.json();
+
+    const createdTask = result.task;
+
+    // Update parent state
+    setTasks((previousTasks) => [...previousTasks, createdTask]);
+
+    toast.add({ type: "success", description: result.message });
     setIsTaskFormOpen(false);
+  }
+
+  async function handleDelete(taskId: string) {
+    const token = localStorage.getItem("accessToken");
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/delete/${taskId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        throw new Error("API failed.");
+      }
+
+      //update your task state
+      setTasks((previousTasks) =>
+        previousTasks.filter((task) => task.id !== taskId),
+      );
+
+      //add toast
+      toast.add({ type: "success", description: "Task deleted successfully." });
+    } catch (error) {
+      console.error(error);
+
+      toast.add({
+        type: "failed",
+        description: "Failed to delete task.",
+      });
+    }
   }
 
   return (
@@ -278,6 +338,7 @@ export function DailyPlanPage() {
             onToggle={toggleTask}
             onToggleSubtask={toggleSubtask}
             onPriorityChange={updateTaskPriority}
+            onDelete={handleDelete}
           />
         </div>
 

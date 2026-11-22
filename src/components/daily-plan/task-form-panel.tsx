@@ -9,9 +9,22 @@ import { PrioritySelector } from "./priority-selector";
 import type { Task, TaskPriority, TaskTag } from "@/types/daily-plan";
 import { toast } from "../ui/toast";
 
+export type CreateTaskInput = {
+  title: string;
+  description: string;
+  deadline: string;
+  difficulty?: TaskPriority;
+  tag: string;
+  subtasks: {
+    id: string;
+    title: string;
+    completed: boolean;
+  }[];
+};
+
 type TaskFormPanelProps = {
   onClose: () => void;
-  onSubmit: (task: Task) => void;
+  onSubmit: (payload: CreateTaskInput) => Promise<void>;
 };
 
 type SubtaskDraft = {
@@ -88,34 +101,15 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
       subtasks,
     };
 
-    setIsSubmitting(true);
-
-    const token = localStorage.getItem("accessToken");
-
     try {
-      // onSubmit(task);
-      console.log(payload);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        },
+      setIsSubmitting(true);
+      await onSubmit(payload);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to create task. Please try again.",
       );
-
-      if (!response.ok) {
-        throw new Error("Task creation failed.");
-      }
-      const result = await response.json();
-
-      toast.add({ type: "success", description: result.message });
-      onSubmit(result.task);
-    } catch {
-      setError("Unable to create the task. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CalendarDays, ChevronDown, ChevronUp, Trash } from "lucide-react";
 
 import { formatShortDate, getTaskProgress } from "@/lib/daily-plan/utils";
@@ -16,6 +16,7 @@ type TaskItemProps = {
   onToggle: (taskId: string) => void;
   onToggleSubtask: (taskId: string, subtaskId: string) => void;
   onPriorityChange: (taskId: string, priority: TaskPriority) => void;
+  onDelete: (taskId: string) => void;
 };
 
 const tagStyles: Record<TaskTag, string> = {
@@ -33,6 +34,7 @@ export function TaskItem({
   onToggle,
   onToggleSubtask,
   onPriorityChange,
+  onDelete,
 }: TaskItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [completed, setCompleted] = useState(task.completed);
@@ -79,28 +81,6 @@ export function TaskItem({
     const data = await result.json();
     console.log(data);
     toast.add({ type: "success", description: data.message });
-  }
-
-  async function handleDelete(taskId: string) {
-    const token = localStorage.getItem("accessToken");
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/delete/${taskId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        throw new Error("API failed.");
-      }
-      toast.add({ type: "success", description: "Task deleted successfully." });
-    } catch (error) {
-      console.log(error);
-    }
   }
 
   return (
@@ -253,7 +233,7 @@ export function TaskItem({
           <button
             type="button"
             aria-label={`Delete ${task.title}`}
-            onClick={() => handleDelete(task.id)}
+            onClick={() => onDelete(task.id)}
             className="
       flex size-8 shrink-0 items-center justify-center
       rounded-lg text-slate-500 transition-colors

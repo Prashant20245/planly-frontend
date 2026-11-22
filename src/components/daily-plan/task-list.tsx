@@ -11,6 +11,7 @@ type TaskListProps = {
   onToggle: (taskId: string) => void;
   onToggleSubtask: (taskId: string, subtaskId: string) => void;
   onPriorityChange: (taskId: string, priority: TaskPriority) => void;
+  onDelete: (taskId: string) => void;
 };
 
 const PAGE_SIZE = 5;
@@ -20,6 +21,7 @@ export function TaskList({
   onToggle,
   onToggleSubtask,
   onPriorityChange,
+  onDelete,
 }: TaskListProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -74,6 +76,7 @@ export function TaskList({
             onToggle={onToggle}
             onToggleSubtask={onToggleSubtask}
             onPriorityChange={onPriorityChange}
+            onDelete={onDelete}
           />
         ))}
       </section>

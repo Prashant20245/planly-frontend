@@ -112,7 +112,7 @@ export function TaskItem({
 
             <PrioritySelector
               value={task.difficulty}
-              onChange={(priority) => onPriorityChange(task.id, priority)}
+              // onChange={(priority) => onPriorityChange(task.id, priority)}
             />
           </div>
 
@@ -146,7 +146,7 @@ export function TaskItem({
 
           <PrioritySelector
             value={task.difficulty}
-            onChange={(priority) => onPriorityChange(task.id, priority)}
+            // onChange={(priority) => onPriorityChange(task.id, priority)}
           />
         </div>
 

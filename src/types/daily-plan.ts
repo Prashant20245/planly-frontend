@@ -23,7 +23,7 @@ export type Task = {
   title: string;
   description: string;
   difficulty: TaskPriority;
-  tag: string;
+  tag: TaskTag;
   deadline: string;
   completed: boolean;
   subtasks: Subtask[];

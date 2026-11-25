@@ -1,4 +1,4 @@
-import { DailyReflection } from "@/types/summary";
+import { DailyReflectionType } from "@/types/summary";
 import { Check, ClipboardList, Edit2, Target, Zap } from "lucide-react";
 
 export default function DailyReflection({
@@ -9,15 +9,15 @@ export default function DailyReflection({
   onSave,
   onChange,
 }: {
-  reflection: DailyReflection;
+  reflection: DailyReflectionType;
   editing: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
-  onChange: (section: keyof DailyReflection, value: string) => void;
+  onChange: (section: keyof DailyReflectionType, value: string) => void;
 }) {
   const sections: {
-    key: keyof DailyReflection;
+    key: keyof DailyReflectionType;
     title: string;
     icon: React.ReactNode;
     className: string;

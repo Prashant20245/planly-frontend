@@ -92,7 +92,7 @@ export function Footer() {
 
         {/* Copyright and legal links */}
         <div className="mt-7 flex flex-col gap-3 border-t border-slate-100 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Planly. All rights reserved.</p>
+          <p>© 2026 Planly. All rights reserved.</p>
 
           <nav aria-label="Legal navigation" className="flex flex-wrap gap-4">
             <Link

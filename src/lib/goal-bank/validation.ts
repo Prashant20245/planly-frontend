@@ -25,7 +25,7 @@ export const createGoalSchema = z.object({
     "OTHER",
   ]),
 
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  priority: z.enum(["EASY", "MEDIUM", "HARD"]),
 });
 
 export const planGoalSchema = z.object({

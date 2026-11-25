@@ -18,9 +18,9 @@ export const GOAL_PRIORITIES: {
   value: GoalPriority;
   label: string;
 }[] = [
-  { value: "HIGH", label: "High" },
+  { value: "HARD", label: "Hard" },
   { value: "MEDIUM", label: "Medium" },
-  { value: "LOW", label: "Low" },
+  { value: "EASY", label: "Easy" },
 ];
 
 export const GOAL_STATUSES: {

@@ -33,7 +33,7 @@ const initialTaskValue: InitialTask = {
   description: "",
   deadline: "",
   difficulty: "EASY",
-  tag: "",
+  tag: "Development",
   subtasks: [],
 };
 

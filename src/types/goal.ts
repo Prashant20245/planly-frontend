@@ -5,7 +5,7 @@ export type GoalStatus =
   | "COMPLETED"
   | "ARCHIVED";
 
-export type GoalPriority = "LOW" | "MEDIUM" | "HIGH";
+export type GoalPriority = "EASY" | "MEDIUM" | "HARD";
 
 export type GoalTag =
   | "DEVELOPMENT"

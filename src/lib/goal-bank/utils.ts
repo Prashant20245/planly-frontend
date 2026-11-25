@@ -27,9 +27,9 @@ export function getGoalCounts(goals: Goal[]) {
 }
 
 const priorityRank: Record<GoalPriority, number> = {
-  HIGH: 3,
+  HARD: 3,
   MEDIUM: 2,
-  LOW: 1,
+  EASY: 1,
 };
 
 export function filterAndSortGoals(goals: Goal[], filters: GoalFilter): Goal[] {

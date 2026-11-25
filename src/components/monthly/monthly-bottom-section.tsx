@@ -53,7 +53,7 @@ function UpcomingDeadlinesCard({
           const Icon = deadline.icon;
 
           const iconStyle =
-            deadline.priority === "high"
+            deadline.priority === "hard"
               ? "bg-red-50 text-red-500"
               : deadline.priority === "medium"
                 ? "bg-orange-50 text-orange-500"

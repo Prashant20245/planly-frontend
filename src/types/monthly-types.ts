@@ -38,7 +38,7 @@ export interface MonthlyDeadline {
   title: string;
   date: string;
   daysLeft: number;
-  priority: "high" | "medium" | "low";
+  priority: "hard" | "medium" | "easy";
   icon: LucideIcon;
 }
 

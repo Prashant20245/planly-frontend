@@ -74,9 +74,9 @@ const statusStyles: Record<GoalStatus, string> = {
 };
 
 const priorityStyles: Record<GoalPriority, string> = {
-  HIGH: "bg-rose-50 text-rose-600",
+  HARD: "bg-rose-50 text-rose-600",
   MEDIUM: "bg-amber-50 text-amber-700",
-  LOW: "bg-emerald-50 text-emerald-700",
+  EASY: "bg-emerald-50 text-emerald-700",
 };
 
 const tagStyles: Record<GoalTag, string> = {

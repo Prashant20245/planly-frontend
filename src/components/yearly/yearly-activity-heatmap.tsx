@@ -153,7 +153,7 @@ export function YearlyActivityHeatmap({
 
           {[
             {
-              label: "Low",
+              label: "Easy",
               color: "bg-emerald-200",
             },
             {
@@ -161,7 +161,7 @@ export function YearlyActivityHeatmap({
               color: "bg-emerald-400",
             },
             {
-              label: "High",
+              label: "Hard",
               color: "bg-emerald-700",
             },
           ].map((level) => (

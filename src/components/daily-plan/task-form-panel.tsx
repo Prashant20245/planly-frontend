@@ -21,7 +21,7 @@ export type CreateTaskInput = {
   difficulty?: TaskPriority;
   tag: string;
   subtasks: {
-    id: string;
+    id?: string;
     title: string;
     completed: boolean;
   }[];
@@ -35,7 +35,8 @@ type TaskFormPanelProps = {
 };
 
 type SubtaskDraft = {
-  id: string;
+  tempId: string;
+  id?: string;
   title: string;
   completed: boolean;
 };
@@ -57,9 +58,19 @@ export function TaskFormPanel({
   );
   const [tag, setTag] = useState<string>(initialTask.tag);
 
+  // const [subtasks, setSubtasks] = useState<SubtaskDraft[]>(
+  //   initialTask.subtasks,
+  // );
+
   const [subtasks, setSubtasks] = useState<SubtaskDraft[]>(
-    initialTask.subtasks,
+    initialTask.subtasks.map((subtask) => ({
+      tempId: crypto.randomUUID(),
+      id: subtask.id,
+      title: subtask.title,
+      completed: subtask.completed,
+    })),
   );
+
   const [subtaskTitle, setSubtaskTitle] = useState("");
 
   const [error, setError] = useState("");
@@ -73,7 +84,7 @@ export function TaskFormPanel({
     setSubtasks((current) => [
       ...current,
       {
-        id: crypto.randomUUID(),
+        tempId: crypto.randomUUID(),
         title: trimmedTitle,
         completed: false,
       },
@@ -83,8 +94,10 @@ export function TaskFormPanel({
     console.log(subtasks);
   }
 
-  function removeSubtask(id: string) {
-    setSubtasks((current) => current.filter((subtask) => subtask.id !== id));
+  function removeSubtask(tempId: string) {
+    setSubtasks((current) =>
+      current.filter((subtask) => subtask.tempId !== tempId),
+    );
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -114,7 +127,12 @@ export function TaskFormPanel({
       deadline,
       difficulty,
       tag,
-      subtasks,
+      // subtasks,
+      subtasks: subtasks.map((subtask) => ({
+        ...(subtask.id ? { id: subtask.id } : {}),
+        title: subtask.title,
+        completed: subtask.completed,
+      })),
     };
 
     try {
@@ -186,7 +204,7 @@ export function TaskFormPanel({
             htmlFor="task-description"
             className="text-sm font-medium text-slate-800"
           >
-            Description
+            Description<span className="text-red-500">*</span>
           </label>
 
           <textarea
@@ -225,6 +243,12 @@ export function TaskFormPanel({
           </div>
         </div>
 
+        <label
+          htmlFor="difficulty"
+          className="text-sm font-medium text-slate-800"
+        >
+          Difficulty<span className="text-red-500">*</span>
+        </label>
         <PrioritySelector value={difficulty} onChange={setDifficulty} />
 
         <div>
@@ -232,7 +256,7 @@ export function TaskFormPanel({
             htmlFor="task-tag"
             className="text-sm font-medium text-slate-800"
           >
-            Tag
+            Tag <span className="text-red-500">*</span>
           </label>
 
           <select
@@ -293,7 +317,7 @@ export function TaskFormPanel({
             <ul className="mt-3 space-y-2">
               {subtasks.map((subtask) => (
                 <li
-                  key={subtask.id}
+                  key={subtask.tempId}
                   className="flex min-w-0 items-center gap-2 rounded-lg border border-slate-200 px-3 py-2"
                 >
                   <span className="min-w-0 flex-1 truncate text-xs text-slate-700">
@@ -311,14 +335,14 @@ export function TaskFormPanel({
                     }
                     className="max-w-24 rounded-md border border-slate-200 bg-white px-1.5 py-1 text-xs outline-none focus:border-emerald-500"
                   >
-                    <option value="LOW">Low</option>
+                    <option value="EASY">Easy</option>
                     <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
+                    <option value="HARD">Hard</option>
                   </select> */}
 
                   <button
                     type="button"
-                    onClick={() => removeSubtask(subtask.id)}
+                    onClick={() => removeSubtask(subtask.tempId)}
                     aria-label={`Remove ${subtask.title}`}
                     className="flex size-7 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-red-600"
                   >

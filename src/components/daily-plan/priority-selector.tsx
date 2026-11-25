@@ -26,7 +26,7 @@ export function PrioritySelector({
         </legend> */}
 
         <div className="grid grid-cols-3 gap-2">
-          {(["EASY", "MEDIUM", "HIGH"] as const).map((priority) => {
+          {(["EASY", "MEDIUM", "HARD"] as const).map((priority) => {
             const selected = value === priority;
 
             return (

@@ -508,7 +508,7 @@ export const monthlyDeadlines: MonthlyDeadline[] = [
     title: "Project report submission",
     date: "28 Sep 2026",
     daysLeft: 2,
-    priority: "high",
+    priority: "hard",
     icon: AlertCircle,
   },
   {
@@ -524,7 +524,7 @@ export const monthlyDeadlines: MonthlyDeadline[] = [
     title: "Plan October goals",
     date: "30 Sep 2026",
     daysLeft: 4,
-    priority: "low",
+    priority: "easy",
     icon: CalendarDays,
   },
   {
@@ -532,7 +532,7 @@ export const monthlyDeadlines: MonthlyDeadline[] = [
     title: "Update resume",
     date: "30 Sep 2026",
     daysLeft: 4,
-    priority: "low",
+    priority: "easy",
     icon: CalendarDays,
   },
 ];

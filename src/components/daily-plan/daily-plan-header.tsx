@@ -27,9 +27,6 @@ export function DailyPlanHeader({
     nextDate.setDate(nextDate.getDate() + days);
     onDateChange(nextDate);
   }
-  useEffect(() => {
-    console.log(selectedDate);
-  }, [selectedDate]);
 
   return (
     <section className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">

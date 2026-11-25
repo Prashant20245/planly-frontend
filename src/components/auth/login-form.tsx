@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,14 +15,11 @@ import {
 } from "lucide-react";
 
 import {
-  validateLogin,
   type LoginFieldErrors,
   type LoginFormValues,
 } from "@/lib/auth/login-validation";
 
-import { loginUser } from "@/services/auth.service";
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
-import { BiEraser } from "react-icons/bi";
 import { useAuth } from "@/context/AuthContext";
 
 const initialValues: LoginFormValues = {
@@ -42,7 +39,7 @@ export function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, _setIsSubmitting] = useState(false);
 
   const [serverError, setServerError] = useState("");
 

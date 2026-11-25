@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { CalendarDays, ChevronRight, Leaf, X } from "lucide-react";
+import { CalendarDays, Leaf, X } from "lucide-react";
 
 import { WeeklyPlanHeader } from "./weekly-plan-header";
 import { WeeklyStatistics } from "./weekly-statistics";

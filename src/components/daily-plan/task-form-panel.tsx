@@ -6,13 +6,7 @@ import { CalendarDays, Plus, Trash2, X } from "lucide-react";
 import { TASK_TAGS } from "@/lib/daily-plan/constants";
 
 import { PrioritySelector } from "./priority-selector";
-import type {
-  InitialTask,
-  Task,
-  TaskPriority,
-  TaskTag,
-} from "@/types/daily-plan";
-import { toast } from "../ui/toast";
+import type { InitialTask, TaskPriority } from "@/types/daily-plan";
 
 export type CreateTaskInput = {
   title: string;

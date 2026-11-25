@@ -1,4 +1,4 @@
-import { formatTime, getCategoryStyles } from "@/lib/summary/utils";
+import { getCategoryStyles } from "@/lib/summary/utils";
 import { TimeSlot } from "@/types/summary";
 import {
   CheckCircle2,
@@ -19,7 +19,7 @@ export default function TimeSlotRow({
 }) {
   const useful = slot.activityType === "USEFUL";
   const useless = slot.activityType === "USELESS";
-  const neutral = slot.activityType === "NEUTRAL";
+  // const neutral = slot.activityType === "NEUTRAL";
 
   return (
     <div className="group flex min-w-0 items-center gap-2">

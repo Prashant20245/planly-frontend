@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { CalendarDays, ChevronDown, Filter, List, Plus } from "lucide-react";
+import { ChevronDown, Filter, Plus } from "lucide-react";
 
 import type { MonthlyTask } from "@/types/monthly-types";
 

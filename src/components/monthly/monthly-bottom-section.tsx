@@ -1,14 +1,10 @@
 import {
-  AlertCircle,
   BookOpen,
   BriefcaseBusiness,
-  CalendarDays,
-  Clock3,
   Code2,
   Heart,
   Layers,
   Lightbulb,
-  Target,
   UserRound,
 } from "lucide-react";
 

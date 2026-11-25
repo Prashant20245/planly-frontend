@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import type { AnnualGoal, TimeAllocation } from "@/types/yearly-types";
 

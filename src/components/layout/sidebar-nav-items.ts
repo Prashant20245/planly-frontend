@@ -1,8 +1,6 @@
 import {
   CalendarDays,
-  CalendarRange,
   ChartNoAxesColumnIncreasing,
-  House,
   Settings,
 } from "lucide-react";
 

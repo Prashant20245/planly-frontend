@@ -11,8 +11,6 @@ import { CreateTaskInput, TaskFormPanel } from "./task-form-panel";
 import {
   getPriorityRank,
   getTaskStatus,
-  isTaskOverdue,
-  isTaskUpcoming,
   matchesStatusFilter,
   toDateKey,
 } from "@/lib/daily-plan/utils";
@@ -23,7 +21,6 @@ import {
   type TaskSortOption,
   type TaskStatusFilter,
   type TaskTag,
-  type Subtask,
   InitialTask,
 } from "@/types/daily-plan";
 import { toast } from "../ui/toast";
@@ -240,7 +237,7 @@ export function DailyPlanPage() {
         type: "success",
         description: result.message,
       });
-    } catch (error) {
+    } catch {
       // Roll back if the API request fails.
       setTasks(previousTasks);
 
@@ -311,7 +308,7 @@ export function DailyPlanPage() {
 
       const result = await response.json();
       toast.add({ type: "success", description: result.message });
-    } catch (error) {
+    } catch {
       setTasks(previousTasks);
       toast.add({
         type: "failed",

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Leaf, X } from "lucide-react";
+import { Leaf } from "lucide-react";
 
 import {
   annualGoals,

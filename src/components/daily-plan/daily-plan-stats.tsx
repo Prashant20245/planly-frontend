@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Circle, Clock3, Leaf } from "lucide-react";
+import { AlertCircle, CheckCircle2, Circle, Clock3 } from "lucide-react";
 
 type DailyPlanStatsProps = {
   total: number;

@@ -8,8 +8,7 @@ import {
   Plus,
 } from "lucide-react";
 
-import { formatDate, toDateKey } from "@/lib/daily-plan/utils";
-import { useEffect } from "react";
+import { toDateKey } from "@/lib/daily-plan/utils";
 
 type DailyPlanHeaderProps = {
   selectedDate: Date;

@@ -42,10 +42,6 @@ const emptySlot: Omit<TimeSlot, "id"> = {
   activityType: "USEFUL",
 };
 
-function createId() {
-  return crypto.randomUUID();
-}
-
 export default function SummaryPage() {
   const [selectedDate, setSelectedDate] = useState(new Date(Date.now()));
 

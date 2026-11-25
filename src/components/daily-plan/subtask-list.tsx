@@ -3,7 +3,6 @@
 import { Trash } from "lucide-react";
 
 import type { Subtask } from "@/types/daily-plan";
-import { toast } from "../ui/toast";
 
 type SubtaskListProps = {
   taskId: string;

@@ -18,7 +18,6 @@ import {
   type SignupFormValues,
 } from "@/lib/auth/signup-validation";
 
-import { registerUser } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 
 const initialValues: SignupFormValues = {

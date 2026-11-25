@@ -9,7 +9,7 @@ type PrioritySelectorProps = {
 const priorityStyles: Record<TaskPriority, string> = {
   EASY: "border-emerald-100 bg-emerald-50 text-emerald-800",
   MEDIUM: "border-amber-100 bg-amber-50 text-amber-800",
-  HIGH: "border-red-100 bg-red-50 text-red-700",
+  HARD: "border-red-100 bg-red-50 text-red-700",
 };
 
 export function PrioritySelector({

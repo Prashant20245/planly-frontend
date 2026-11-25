@@ -83,36 +83,6 @@ export function getTaskProgress(task: Task): number {
   return Math.round((completedSubtasks / task.subtasks.length) * 100);
 }
 
-// export function getTaskStatus(
-//   task: Task,
-// ): "TODO" | "IN_PROGRESS" | "COMPLETED" {
-//   if (task.completed) {
-//     return "COMPLETED";
-//   }
-
-//   if (
-//     task.subtasks.length > 0 &&
-//     task.subtasks.every((subtask) => subtask.completed)
-//   ) {
-//     return "COMPLETED";
-//   }
-
-//   if (
-//     task.subtasks.some((subtask) => subtask.completed) ||
-//     task.completed === false
-//   ) {
-//     return "IN_PROGRESS";
-//   }
-
-//   if (task.deadline > selectedDate) {
-//     return "UPCOMING";
-//   }
-//   if (task.deadline < selectedDate && task.completed == false) {
-//     return "OVERDUE";
-//   }
-//   return "TODO";
-// }
-
 export function getTaskStatus(
   task: Task,
   selectedDate: string,
@@ -180,7 +150,7 @@ export function matchesStatusFilter(
 
 export function getPriorityRank(priority: TaskPriority): number {
   const ranks: Record<TaskPriority, number> = {
-    HIGH: 3,
+    HARD: 3,
     MEDIUM: 2,
     EASY: 1,
   };

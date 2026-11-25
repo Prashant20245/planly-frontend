@@ -6,7 +6,12 @@ import { CalendarDays, Plus, Trash2, X } from "lucide-react";
 import { TASK_TAGS } from "@/lib/daily-plan/constants";
 
 import { PrioritySelector } from "./priority-selector";
-import type { Task, TaskPriority, TaskTag } from "@/types/daily-plan";
+import type {
+  InitialTask,
+  Task,
+  TaskPriority,
+  TaskTag,
+} from "@/types/daily-plan";
 import { toast } from "../ui/toast";
 
 export type CreateTaskInput = {
@@ -25,6 +30,8 @@ export type CreateTaskInput = {
 type TaskFormPanelProps = {
   onClose: () => void;
   onSubmit: (payload: CreateTaskInput) => Promise<void>;
+  initialTask: InitialTask;
+  editingTaskId: string | null;
 };
 
 type SubtaskDraft = {
@@ -36,14 +43,23 @@ type SubtaskDraft = {
 const inputClass =
   "mt-1.5 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100";
 
-export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [difficulty, setDifficulty] = useState<TaskPriority>();
-  const [tag, setTag] = useState<string>("");
+export function TaskFormPanel({
+  onClose,
+  onSubmit,
+  initialTask,
+  editingTaskId,
+}: TaskFormPanelProps) {
+  const [title, setTitle] = useState(initialTask.title);
+  const [description, setDescription] = useState(initialTask.description);
+  const [deadline, setDeadline] = useState(initialTask.deadline);
+  const [difficulty, setDifficulty] = useState<TaskPriority>(
+    initialTask.difficulty,
+  );
+  const [tag, setTag] = useState<string>(initialTask.tag);
 
-  const [subtasks, setSubtasks] = useState<SubtaskDraft[]>([]);
+  const [subtasks, setSubtasks] = useState<SubtaskDraft[]>(
+    initialTask.subtasks,
+  );
   const [subtaskTitle, setSubtaskTitle] = useState("");
 
   const [error, setError] = useState("");
@@ -337,7 +353,13 @@ export function TaskFormPanel({ onClose, onSubmit }: TaskFormPanelProps) {
             disabled={isSubmitting}
             className="h-10 rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Creating..." : "Create Task"}
+            {isSubmitting
+              ? editingTaskId
+                ? "Editing"
+                : "Creating"
+              : editingTaskId
+                ? "Edit Task"
+                : "Create Task"}
           </button>
         </div>
       </form>

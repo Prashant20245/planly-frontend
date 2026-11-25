@@ -1,22 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, ChevronDown, ChevronUp, Trash } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Trash,
+} from "lucide-react";
 
 import { formatShortDate, getTaskProgress } from "@/lib/daily-plan/utils";
 
 import { PrioritySelector } from "./priority-selector";
 import { SubtaskList } from "./subtask-list";
 
-import type { Task, TaskPriority, TaskTag } from "@/types/daily-plan";
-import { toast } from "../ui/toast";
+import type { Task, TaskTag } from "@/types/daily-plan";
 
 type TaskItemProps = {
   task: Task;
   onToggle: (taskId: string) => void;
   onToggleSubtask: (taskId: string, subtaskId: string) => void;
-  onPriorityChange: (taskId: string, priority: TaskPriority) => void;
-  onDelete: (taskId: string) => void;
+  onDeleteTask: (taskId: string) => void;
+  onDeleteSubtask: (taskId: string, subtaskId: string) => void;
+  onEditTask: (taskId: string) => void;
 };
 
 const tagStyles: Record<TaskTag, string> = {
@@ -33,18 +39,18 @@ export function TaskItem({
   task,
   onToggle,
   onToggleSubtask,
-  onPriorityChange,
-  onDelete,
+  onDeleteTask,
+  onDeleteSubtask,
+  onEditTask,
 }: TaskItemProps) {
   const [expanded, setExpanded] = useState(false);
-  const [completed, setCompleted] = useState(task.completed);
 
   // Calculate progress safely
   const calculatedProgress = getTaskProgress(task);
 
   const progress = Number.isFinite(calculatedProgress)
     ? Math.min(100, Math.max(0, calculatedProgress))
-    : completed
+    : task.completed
       ? 100
       : 0;
 
@@ -52,55 +58,24 @@ export function TaskItem({
     (item) => item.completed,
   ).length;
 
-  async function handleChange() {
-    const token = localStorage.getItem("accessToken");
-    // Calculate the next state
-    const nextCompleted = !completed;
-
-    // Optimistically update UI
-    setCompleted(nextCompleted);
-    const result = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/updateStatus/${task.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          completed: nextCompleted,
-        }),
-      },
-    );
-
-    if (!result.ok) {
-      toast.add({ type: "failed", description: "Failed" });
-      throw new Error("API failed.");
-    }
-
-    const data = await result.json();
-    console.log(data);
-    toast.add({ type: "success", description: data.message });
-  }
-
   return (
     <article className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/[0.02] transition-colors hover:border-slate-300">
       <div
         className="
           grid min-h-[76px]
-          grid-cols-[24px_minmax(0,1fr)_32px]
+          grid-cols-[24px_minmax(0,1fr)_104px]
           items-start gap-3 px-3.5 py-3
           sm:px-4
-          xl:grid-cols-[24px_minmax(120px,1.3fr)_minmax(80px,0.7fr)_minmax(210px,1.4fr)_minmax(125px,1fr)_minmax(120px,1fr)_32px]
+          xl:grid-cols-[24px_minmax(120px,1.3fr)_minmax(80px,0.7fr)_minmax(210px,1.4fr)_minmax(125px,1fr)_minmax(120px,1fr)_104px]
         "
       >
         {/* Checkbox */}
         <input
           type="checkbox"
-          checked={completed}
-          onChange={handleChange}
+          checked={task.completed}
+          onChange={() => onToggle(task.id)}
           aria-label={`Mark ${task.title} as ${
-            completed ? "incomplete" : "complete"
+            task.completed ? "incomplete" : "complete"
           }`}
           className="
             mt-2 size-[19px] self-start cursor-pointer
@@ -117,7 +92,7 @@ export function TaskItem({
 
           <p
             className={`truncate text-sm font-medium ${
-              completed ? "text-slate-500 line-through" : "text-slate-900"
+              task.completed ? "text-slate-500 line-through" : "text-slate-900"
             }`}
           >
             {task.title}
@@ -191,7 +166,7 @@ export function TaskItem({
           <p className="mt-1 text-[11px] text-slate-500">
             {task.subtasks.length > 0
               ? `${completedSubtasks}/${task.subtasks.length} subtasks`
-              : completed
+              : task.completed
                 ? "Completed"
                 : "Task deadline"}
           </p>
@@ -228,12 +203,29 @@ export function TaskItem({
         </div>
 
         {/* Actions: Delete and Expand / Collapse */}
-        <div className="mt-1 items-center justify-end gap-1">
+        {/* Edit */}
+        <div className="mt-1 flex items-center justify-end gap-1">
+          <button
+            type="button"
+            aria-label={`Edit ${task.title}`}
+            onClick={() => onEditTask(task.id)}
+            className="
+      flex size-8 shrink-0 items-center justify-center
+      rounded-lg text-slate-500 transition-colors
+      hover:bg-blue-50 hover:text-blue-600
+      focus-visible:outline-2
+      focus-visible:outline-offset-2
+      focus-visible:outline-blue-600
+    "
+          >
+            <Pencil aria-hidden="true" className="size-4" />
+          </button>
+
           {/* Delete */}
           <button
             type="button"
             aria-label={`Delete ${task.title}`}
-            onClick={() => onDelete(task.id)}
+            onClick={() => onDeleteTask(task.id)}
             className="
       flex size-8 shrink-0 items-center justify-center
       rounded-lg text-slate-500 transition-colors
@@ -301,17 +293,10 @@ export function TaskItem({
           )}
 
           <SubtaskList
+            taskId={task.id}
             subtasks={task.subtasks}
-            onToggle={(subtaskId) => onToggleSubtask(task.id, subtaskId)}
-            onPriorityChange={(subtaskId, priority) => {
-              // Connect this to the backend mutation
-              // when subtask priority editing is implemented.
-              console.debug(
-                "Subtask priority change requested",
-                subtaskId,
-                priority,
-              );
-            }}
+            onToggle={onToggleSubtask}
+            onDeleteSubtask={onDeleteSubtask}
           />
         </div>
       )}

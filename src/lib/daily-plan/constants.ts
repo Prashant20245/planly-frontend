@@ -15,7 +15,7 @@ export const TASK_TAGS: TaskTag[] = [
   "Reading",
 ];
 
-export const TASK_PRIORITIES: TaskPriority[] = ["LOW", "MEDIUM", "HIGH"];
+export const TASK_PRIORITIES: TaskPriority[] = ["EASY", "MEDIUM", "HARD"];
 
 export const TASK_STATUS_FILTERS: {
   label: string;

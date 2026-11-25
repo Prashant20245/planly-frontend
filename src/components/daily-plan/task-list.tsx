@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { ClipboardList, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { TaskItem } from "./task-item";
-import type { Task, TaskPriority } from "@/types/daily-plan";
+import type { Task } from "@/types/daily-plan";
 
 type TaskListProps = {
   tasks: Task[];
   onToggle: (taskId: string) => void;
   onToggleSubtask: (taskId: string, subtaskId: string) => void;
-  onPriorityChange: (taskId: string, priority: TaskPriority) => void;
-  onDelete: (taskId: string) => void;
+  onDeleteTask: (taskId: string) => void;
+  onDeleteSubtask: (taskId: string, subtaskId: string) => void;
+  onEditTask: (taskId: string) => void;
 };
 
 const PAGE_SIZE = 5;
@@ -20,8 +21,9 @@ export function TaskList({
   tasks,
   onToggle,
   onToggleSubtask,
-  onPriorityChange,
-  onDelete,
+  onDeleteTask,
+  onDeleteSubtask,
+  onEditTask,
 }: TaskListProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -75,8 +77,9 @@ export function TaskList({
             task={task}
             onToggle={onToggle}
             onToggleSubtask={onToggleSubtask}
-            onPriorityChange={onPriorityChange}
-            onDelete={onDelete}
+            onDeleteTask={onDeleteTask}
+            onDeleteSubtask={onDeleteSubtask}
+            onEditTask={onEditTask}
           />
         ))}
       </section>

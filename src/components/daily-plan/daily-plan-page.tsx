@@ -17,14 +17,25 @@ import {
   toDateKey,
 } from "@/lib/daily-plan/utils";
 
-import type {
-  Task,
-  TaskPriority,
-  TaskSortOption,
-  TaskStatusFilter,
-  TaskTag,
+import {
+  type Task,
+  type TaskPriority,
+  type TaskSortOption,
+  type TaskStatusFilter,
+  type TaskTag,
+  type Subtask,
+  InitialTask,
 } from "@/types/daily-plan";
 import { toast } from "../ui/toast";
+
+const initialTaskValue: InitialTask = {
+  title: "",
+  description: "",
+  deadline: "",
+  difficulty: "EASY",
+  tag: "",
+  subtasks: [],
+};
 
 export function DailyPlanPage() {
   // Use a stable initial date for this UI prototype.
@@ -33,6 +44,8 @@ export function DailyPlanPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date(Date.now()));
 
   const [tasks, setTasks] = useState<Task[]>([]);
+
+  const [initialTask, setInitialTask] = useState<InitialTask>(initialTaskValue);
 
   const [activeStatus, setActiveStatus] = useState<TaskStatusFilter>("TODO");
 
@@ -45,8 +58,11 @@ export function DailyPlanPage() {
   const [sortBy, setSortBy] = useState<TaskSortOption>("DEADLINE");
 
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const selectedDateKey = toDateKey(selectedDate);
+
+  const token = localStorage.getItem("accessToken");
 
   const formattedDate = [
     selectedDate.getFullYear(),
@@ -58,7 +74,6 @@ export function DailyPlanPage() {
   useEffect(() => {
     async function fetchTasks() {
       try {
-        const token = localStorage.getItem("accessToken");
         const result = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/date/${formattedDate}`,
           {
@@ -172,52 +187,99 @@ export function DailyPlanPage() {
     sortBy,
   ]);
 
-  function toggleTask(taskId: string) {
+  console.log("Tasks", tasks);
+
+  async function toggleTask(taskId: string) {
+    const task = tasks.find((item) => item.id === taskId);
+
+    if (!task) return;
+
+    const nextCompleted = !task.completed;
+
+    // Preserve the previous state for rollback.
+    const previousTasks = tasks;
+
+    // Optimistically update the UI.
     setTasks((current) =>
-      current.map((task) => {
-        if (task.id !== taskId) {
-          return task;
-        }
-
-        const nextStatus =
-          getTaskStatus(task) === "COMPLETED" ? "TODO" : "COMPLETED";
-
-        return {
-          ...task,
-          status: nextStatus,
-          subtasks:
-            nextStatus === "COMPLETED"
-              ? task.subtasks.map((subtask) => ({
-                  ...subtask,
-                  completed: true,
-                }))
-              : task.subtasks,
-        };
-      }),
+      current.map((item) =>
+        item.id === taskId
+          ? {
+              ...item,
+              completed: nextCompleted,
+              subtasks: item.subtasks.map((subtask) => ({
+                ...subtask,
+                completed: nextCompleted,
+              })),
+            }
+          : item,
+      ),
     );
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/updateStatus/${taskId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            completed: nextCompleted,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update task.");
+      }
+
+      const result = await response.json();
+
+      toast.add({
+        type: "success",
+        description: result.message,
+      });
+    } catch (error) {
+      // Roll back if the API request fails.
+      setTasks(previousTasks);
+
+      toast.add({
+        type: "failed",
+        description: "Failed to update task status.",
+      });
+    }
   }
 
-  function toggleSubtask(taskId: string, subtaskId: string) {
-    setTasks((current) =>
-      current.map((task) => {
-        if (task.id !== taskId) {
-          return task;
-        }
+  async function toggleSubtask(taskId: string, subtaskId: string) {
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task) return;
+    const subtask = task.subtasks.find((subtask) => subtask.id === subtaskId);
+    if (!subtask) return;
+    const nextCompleted = !subtask.completed;
+    const previousTasks = tasks;
 
-        const subtasks = task.subtasks.map((subtask) =>
+    //optimistically update the ui
+    setTasks((current) =>
+      current.map((item) => {
+        if (item.id !== taskId) return item;
+
+        const subtasks = item.subtasks.map((subtask) =>
           subtask.id === subtaskId
-            ? { ...subtask, completed: !subtask.completed }
+            ? { ...subtask, completed: nextCompleted }
             : subtask,
         );
 
+        // 2. Calculate parent task completion
         const allCompleted =
           subtasks.length > 0 && subtasks.every((subtask) => subtask.completed);
 
         const someCompleted = subtasks.some((subtask) => subtask.completed);
 
         return {
-          ...task,
+          ...item,
           subtasks,
+          completed: allCompleted,
           status: allCompleted
             ? "COMPLETED"
             : someCompleted
@@ -226,19 +288,40 @@ export function DailyPlanPage() {
         };
       }),
     );
-  }
 
-  function updateTaskPriority(taskId: string, priority: TaskPriority) {
-    setTasks((current) =>
-      current.map((task) =>
-        task.id === taskId ? { ...task, priority } : task,
-      ),
-    );
+    //update backend
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/updateStatus/task/${subtask.taskId}/subTask/${subtask.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            completed: nextCompleted,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update subtask.");
+      }
+
+      const result = await response.json();
+      toast.add({ type: "success", description: result.message });
+    } catch (error) {
+      setTasks(previousTasks);
+      toast.add({
+        type: "failed",
+        description: "Failed to update subtask status.",
+      });
+    }
   }
 
   async function createTask(payload: CreateTaskInput) {
-    const token = localStorage.getItem("accessToken");
-
+    console.log("Create Task");
     // onSubmit(task);
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/create`,
@@ -266,8 +349,7 @@ export function DailyPlanPage() {
     setIsTaskFormOpen(false);
   }
 
-  async function handleDelete(taskId: string) {
-    const token = localStorage.getItem("accessToken");
+  async function deleteTask(taskId: string) {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/delete/${taskId}`,
@@ -300,12 +382,120 @@ export function DailyPlanPage() {
     }
   }
 
+  async function editTask(taskId: string) {
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task) return;
+    // console.log(task);
+    setInitialTask({
+      title: task.title,
+      description: task.description,
+      deadline: task.deadline.slice(0, 10),
+      difficulty: task.difficulty,
+      tag: task.tag,
+      subtasks: task.subtasks,
+    });
+    setEditingTaskId(task.id);
+    setIsTaskFormOpen(true);
+  }
+
+  // console.log("editingTaskId", editingTaskId);
+
+  async function updateTask(taskId: string, payload: CreateTaskInput) {
+    console.log("Update Task");
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/update/${taskId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Task update failed.");
+    }
+
+    const result = await response.json();
+
+    setTasks((previousTasks) =>
+      previousTasks.map((task) => (task.id === taskId ? result.task : task)),
+    );
+
+    toast.add({
+      type: "success",
+      description: result.message,
+    });
+  }
+
+  async function handleTaskFormSubmit(payload: CreateTaskInput) {
+    if (editingTaskId) {
+      await updateTask(editingTaskId, payload);
+    } else {
+      await createTask(payload);
+    }
+
+    setIsTaskFormOpen(false);
+    setEditingTaskId(null);
+  }
+
+  async function deleteSubtask(taskId: string, subtaskId: string) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/task/delete/task/${taskId}/subtask/${subtaskId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete subtask.");
+      }
+
+      const result = await response.json();
+      setTasks((previousTasks) =>
+        previousTasks.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                subtasks: task.subtasks.filter(
+                  (subtask) => subtask.id !== subtaskId,
+                ),
+              }
+            : task,
+        ),
+      );
+      console.log(result);
+      toast.add({
+        type: "success",
+        description: "Subtask deleted successfully.",
+      });
+    } catch (error) {
+      console.error("Subtask deletion error:", error);
+
+      toast.add({
+        type: "error",
+        description: "Unable to delete subtask.",
+      });
+    }
+  }
+
   return (
     <main className="mx-auto w-full max-w-[1800px] space-y-5 p-4 sm:p-5 lg:p-7">
       <DailyPlanHeader
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
-        onAddTask={() => setIsTaskFormOpen(true)}
+        onAddTask={() => {
+          setEditingTaskId(null);
+          setInitialTask(initialTaskValue);
+          setIsTaskFormOpen(true);
+        }}
       />
       <DailyPlanStats
         total={statistics.total}
@@ -337,8 +527,9 @@ export function DailyPlanPage() {
             tasks={filteredTasks}
             onToggle={toggleTask}
             onToggleSubtask={toggleSubtask}
-            onPriorityChange={updateTaskPriority}
-            onDelete={handleDelete}
+            onDeleteTask={deleteTask}
+            onDeleteSubtask={deleteSubtask}
+            onEditTask={editTask}
           />
         </div>
 
@@ -362,8 +553,13 @@ export function DailyPlanPage() {
           >
             <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
               <TaskFormPanel
-                onClose={() => setIsTaskFormOpen(false)}
-                onSubmit={createTask}
+                onClose={() => {
+                  setIsTaskFormOpen(false);
+                  setEditingTaskId(null);
+                }}
+                onSubmit={handleTaskFormSubmit}
+                initialTask={initialTask}
+                editingTaskId={editingTaskId}
               />
             </div>
           </div>

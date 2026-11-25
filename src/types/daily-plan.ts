@@ -1,6 +1,6 @@
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED";
 
-export type TaskPriority = "EASY" | "MEDIUM" | "HIGH";
+export type TaskPriority = "EASY" | "MEDIUM" | "HARD";
 
 export type TaskTag =
   | "Development"
@@ -28,6 +28,8 @@ export type Task = {
   completed: boolean;
   subtasks: Subtask[];
 };
+
+export type InitialTask = Omit<Task, "id" | "completed">;
 
 export type TaskStatusFilter =
   | "ALL"

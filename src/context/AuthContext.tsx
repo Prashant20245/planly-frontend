@@ -1,73 +1,3 @@
-// "use client";
-// import {
-//   createContext,
-//   ReactNode,
-//   useContext,
-//   useEffect,
-//   useState,
-// } from "react";
-
-// type AuthStatus = "pending" | "authenticated" | "unauthenticated";
-// export interface User {
-//   id: string;
-//   name: string;
-//   email: string;
-// }
-// interface AuthContextType {
-//   user: User | null;
-//   isAuthenticated: boolean;
-// }
-// const AuthContext = createContext<AuthContextType | null>(null);
-
-// export function AuthProvider({ children }: { children: ReactNode }) {
-//   const [user, setUser] = useState(null);
-//   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-//   const [isLoading, setIsLoading] = useState<boolean>(false);
-//   useEffect(() => {
-//     async function getCurrentUser() {
-//       try {
-//         const token = localStorage.getItem("accessToken");
-//         const result = await fetch(
-//           `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`,
-//           {
-//             method: "GET",
-//             headers: {
-//               "Content-Type": "application/json",
-//               Authorization: `Bearer ${token}`,
-//             },
-//           },
-//         );
-//         if (!result.ok) {
-//           setUser(null);
-//           setIsAuthenticated(false);
-//           throw new Error("Unable to verify authentication.");
-//         }
-//         const data = await result.json();
-//         setUser(data.user);
-//         setIsAuthenticated(true);
-//       } catch (error) {
-//         console.log("Auth error", error);
-//         setUser(null);
-//         setIsAuthenticated(false);
-//       }
-//     }
-//     getCurrentUser();
-//   }, []);
-//   return (
-//     <AuthContext.Provider value={{ user, isAuthenticated }}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// }
-
-// export function useAuth() {
-//   const context = useContext(AuthContext);
-//   if (context === null) {
-//     throw new Error("useAuth must be used within AuthProvider");
-//   }
-//   return context;
-// }
-
 "use client";
 
 import {
@@ -77,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 export type AuthStatus = "pending" | "authenticated" | "unauthenticated";
 
@@ -115,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const result = await fetch(
+        const response = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`,
           {
             method: "GET",
@@ -126,9 +57,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         );
 
-        if (!result.ok) {
-          if (result.status === 401) {
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            toast.error("Invalid email or password.");
             localStorage.removeItem("accessToken");
+          } else if (response.status >= 500) {
+            toast.error(
+              "Something went wrong on our end. Please try again later.",
+            );
+          } else {
+            toast.error(result.message || "Unable to sign in.");
           }
 
           setUser(null);
@@ -136,10 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        const data = await result.json();
-
-        setUser(data.user);
+        setUser(result.user);
         setStatus("authenticated");
+        toast.success("Welcome back!");
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
           return;
@@ -148,6 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Authentication error:", error);
         setUser(null);
         setStatus("unauthenticated");
+        toast.error(
+          "Unable to connect to the server. Please check your internet connection.",
+        );
       }
     }
 

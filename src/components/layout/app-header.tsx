@@ -18,6 +18,7 @@ import {
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 type AppHeaderProps = {
   userName?: string;
@@ -120,8 +121,10 @@ export default function AppHeader({
       await onSignOut?.();
 
       router.replace("/login");
+      toast.success("Logged out successfully.");
     } catch (error) {
       console.error("Failed to sign out:", error);
+      toast.error("Failed to logout. Please try again later.");
     } finally {
       setIsSigningOut(false);
       setIsProfileOpen(false);

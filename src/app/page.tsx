@@ -11,6 +11,7 @@ import { Footer } from "@/components/landing/footer";
 import { requireAuth } from "@/lib/requireAuth";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/toast";
 
 export default function HomePage() {
   const router = useRouter();
@@ -22,7 +23,11 @@ export default function HomePage() {
           router.replace("/my-tasks");
         }
       } catch (error) {
-        console.log(error);
+        console.error("Authentication check failed:", error);
+        toast.add({
+          type: "failed",
+          description: "Authentication check failed.",
+        });
       }
     }
     checkAuthentication();

@@ -19,6 +19,7 @@ import {
 } from "@/lib/auth/signup-validation";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const initialValues: SignupFormValues = {
   name: "",
@@ -87,15 +88,19 @@ export function SignupForm() {
         },
       );
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("API request failed.");
+        if (response.status === 409) {
+          toast.error(result.message);
+        }
       }
 
-      const data = await response.json();
-
       setSuccessMessage(
-        data.message || "Your account was created successfully.",
+        result.message || "Your account was created successfully.",
       );
+
+      toast.success(result.message);
 
       setValues(initialValues);
       setErrors({});

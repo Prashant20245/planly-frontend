@@ -21,6 +21,7 @@ import {
 
 import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const initialValues: LoginFormValues = {
   email: "",
@@ -79,16 +80,26 @@ export function LoginForm() {
           }),
         },
       );
+      const result = await response.json();
       if (!response.ok) {
-        throw new Error("API request failed.");
+        if (response.status == 401) {
+          toast.error(result.message);
+        }
+        if (response.status >= 500) {
+          toast.error(
+            "Something went wrong on our end. Please try again later.",
+          );
+        }
       }
-      const data = await response.json();
-      if (!data.loginData.accessToken) {
-        throw new Error("Backend did not return access token.");
+
+      if (!result.loginData.accessToken) {
+        // throw new Error("Backend did not return access token.");
+        toast.error("Backend did not return access token.");
       }
-      localStorage.setItem("accessToken", data.loginData.accessToken);
-      setAuth(data.loginData.user);
+      localStorage.setItem("accessToken", result.loginData.accessToken);
+      setAuth(result.loginData.user);
       router.replace("/my-tasks");
+      toast.success("Sign in successful. Welcome back!");
     } catch (error) {
       console.log(error);
     }
